@@ -1,0 +1,68 @@
+id: com.ootrandomizer.electrongui
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '24.08'
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node22
+build-options:
+  append-path: /usr/lib/sdk/node22/bin
+command: ootr-electron-gui
+finish-args:
+  # Recommended by Electron.BaseApp
+  - --socket=x11
+  - --share=ipc  # Improves X11 performance
+  # Hardware acceleration
+  - --device=dri
+  # Access Network (check updates)
+  - --share=network
+  # Allow filesystem access outside of sandbox
+  - --filesystem=host
+modules:
+  - name: oot-randomizer-gui-install
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 run.sh ${FLATPAK_DEST}/bin/ootr-electron-gui
+      - install -Dm644 ${FLATPAK_ID}.desktop -t /app/share/applications
+    sources:
+      - type: script
+        dest-filename: run.sh
+        commands:
+          - exec zypak-wrapper "/app/ootr-electron-gui/oot-randomizer-gui" "${EXTRA_ARGS[@]}" "$@"
+      - type: file
+        path: com.ootrandomizer.electrongui.desktop
+  - name: oot-randomizer-gui
+    buildsystem: simple
+    build-options:
+      env:
+        XDG_CACHE_HOME: /run/build/oot-randomizer-gui/flatpak-node/cache
+        npm_config_cache: /run/build/oot-randomizer-gui/flatpak-node/npm-cache
+        npm_config_nodedir: /usr/lib/sdk/node22
+        npm_config_offline: 'true'
+    subdir: GUI
+    build-commands:
+      - exec ../SettingsToJson.py
+      - mkdir -p python/ASM
+      - mv ../ASM/build python/ASM
+      - mv ../bin python
+      - mv ../data python
+      - mv ../*.* python
+      - rm package.json
+      - mv package_release.json package.json
+      - npm install --offline
+      - npm run ng-flatpak
+      - npm run pack
+      - mv installer/linux*unpacked /app/ootr-electron-gui
+      - mkdir -p /app/share/icons/hicolor/512x512/apps
+      - cp dist/ootr-electron-gui/favicon.png /app/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
+    sources:
+      - type: git
+        url: file:///home/vcunningham/Development/CLionProjects/OoT-Randomizer
+        branch: flatpak-prep
+        # tag: v8.2
+        # commit: 56d08e8934d1617d3ecbd36891023bd160c2f015
+
+      # NPM Packages (generated with pyPI `flatpak-node-generator npm package-lock.json`)
+      ## IMPORTANT: package-lock.json and generated-sources.json MUST match
+      - generated-sources.json

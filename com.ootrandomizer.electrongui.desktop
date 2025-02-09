@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Ocarina of Time Randomizer
+Exec=ootr-electron-gui
+Type=Application
+Icon=com.ootrandomizer.electrongui
+Categories=Game;
