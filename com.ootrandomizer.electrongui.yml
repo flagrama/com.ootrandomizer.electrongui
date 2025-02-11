@@ -58,7 +58,7 @@ modules:
       - cp dist/ootr-electron-gui/favicon.png /app/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
     sources:
       - type: git
-        url: file:///home/vcunningham/Development/CLionProjects/OoT-Randomizer
+        url: https://github.com/flagrama/OoT-Randomizer
         branch: flatpak-prep
         # tag: v8.2
         # commit: 56d08e8934d1617d3ecbd36891023bd160c2f015
